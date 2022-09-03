@@ -1,0 +1,276 @@
+class FacilityGridHighlight extends Panel
+{
+   static var TYPE_DEFAULT = 0;
+   static var TYPE_ARMORY = 1;
+   static var TYPE_CIC = 2;
+   static var TYPE_POWERCORE = 3;
+   static var TYPE_COMMANDER = 4;
+   static var TYPE_ENGINEERING = 5;
+   function FacilityGridHighlight()
+   {
+      super();
+   }
+   function onLoad()
+   {
+      super.onLoad();
+      this.setConstruction(false);
+      this.setClearing(false);
+      this.isRightAligned = false;
+      this.isCenterAligned = false;
+      this.roomOutline = this.roomOutline;
+      this.roomOutline.hitTestDisable = false;
+      this.roomLabel.hitTestDisable = true;
+      this.roomMask.hitTestDisable = true;
+      this.construction.hitTestDisable = true;
+      this.clearing.hitTestDisable = true;
+      this.statusLabel.hitTestDisable = true;
+      this.queueLabel.hitTestDisable = true;
+      this.roomOutline.uvGuide.hitTestDisable = true;
+      Utilities.ShadowToTextField(this.roomLabel.label);
+      Utilities.ShadowToTextField(this.statusLabel.label);
+      Utilities.ShadowToTextField(this.queueLabel.label);
+   }
+   function processMouseEvents()
+   {
+      this.roomOutline.processMouseEvents();
+   }
+   function dispose()
+   {
+      super.dispose();
+   }
+   function setLabel(newLabel)
+   {
+      if(newLabel == "" || newLabel == undefined)
+      {
+         this.roomLabel._visible = false;
+      }
+      else
+      {
+         this.roomLabel._visible = true;
+         this.roomLabel.label.htmlText = newLabel;
+         this.roomLabel.label.autoSize = true;
+         this.roomLabel.bg._width = this.roomLabel.label.textWidth + 24;
+      }
+      this.realize();
+   }
+   function setStatus(newStatus, newQueue)
+   {
+      if(newStatus == "" || newStatus == undefined)
+      {
+         this.statusLabel._visible = false;
+      }
+      else
+      {
+         this.statusLabel._visible = true;
+         this.StatusText = newStatus;
+         this.statusLabel.label.htmlText = newStatus;
+         this.statusLabel.label.autoSize = true;
+         this.statusLabel.bg._width = this.statusLabel.label.textWidth + 24;
+      }
+      if(newQueue == "" || newQueue == undefined)
+      {
+         this.queueLabel._visible = false;
+      }
+      else
+      {
+         this.queueLabel._visible = true;
+         this.queueLabel.label.htmlText = newQueue;
+         this.queueLabel.label.autoSize = true;
+         this.queueLabel.bg._width = this.queueLabel.label.textWidth + 24;
+      }
+      this.realize();
+   }
+   function setConstruction(hasConstruction)
+   {
+      this.construction._visible = hasConstruction;
+   }
+   function setClearing(hasClearing)
+   {
+      this.clearing._visible = hasClearing;
+   }
+   function setSize(width, height)
+   {
+      if(width == "" || width == undefined)
+      {
+         width = this._width;
+      }
+      if(height == "" || height == undefined)
+      {
+         height = this._height;
+      }
+      this.roomOutline._width = width;
+      this.roomOutline._height = height;
+      this.roomMask._width = width;
+      this.roomMask._height = height;
+      this.construction._x = width * 0.5;
+      this.construction._y = height * 0.5;
+      this.clearing._x = width * 0.5;
+      this.clearing._y = height * 0.5;
+      this.OverlayUpgradeButton._x = width - 10;
+      this.OverlayUpgradeButton._y = height - 52;
+      this.OverlayRemoveButton._x = 50;
+      this.OverlayRemoveButton._y = height - 52;
+      this.OverlayCancelConstructionButton._x = width - 10;
+      this.realize();
+   }
+   function realize()
+   {
+      switch(this.RoomType)
+      {
+         case FacilityGridHighlight.TYPE_ARMORY:
+            this.alignArmoryTitle();
+            break;
+         case FacilityGridHighlight.TYPE_CIC:
+            this.alignCICTitle();
+            break;
+         case FacilityGridHighlight.TYPE_COMMANDER:
+            this.alignCommanderTitle();
+            break;
+         case FacilityGridHighlight.TYPE_ENGINEERING:
+            this.alignEngineeringTitle();
+            break;
+         case FacilityGridHighlight.TYPE_POWERCORE:
+            this.alignPowerCoreTitle();
+            break;
+         case FacilityGridHighlight.TYPE_DEFAULT:
+         default:
+            this.alignDefault();
+      }
+      if(this.isRightAligned)
+      {
+         this.alignRight();
+      }
+      if(this.isCenterAligned)
+      {
+         this.alignCenter();
+      }
+   }
+   function setHighlighted(bIsHighlighted)
+   {
+      if(bIsHighlighted)
+      {
+         this.roomOutline.gotoAndPlay("highlight");
+      }
+      else
+      {
+         this.roomOutline.gotoAndPlay("unhighlight");
+      }
+   }
+   function alignDefault()
+   {
+      this.RoomType = FacilityGridHighlight.TYPE_DEFAULT;
+      this.statusLabel._x = 0;
+      this.queueLabel._x = 0;
+      this.statusLabel._y = this.roomLabel._y + this.roomLabel._height + 2;
+      this.queueLabel.label.multiline = true;
+      this.queueLabel.label.wordWrap = true;
+      this.queueLabel.label.autoSize = true;
+      this.queueLabel.label._width = this.roomOutline._width;
+      this.queueLabel.bg._width = this.queueLabel.label.textWidth + 24;
+      this.queueLabel.bg._height = this.queueLabel.label.textHeight + 10;
+      this.queueLabel._y = this.roomOutline._height - this.queueLabel._height;
+   }
+   function alignArmoryTitle()
+   {
+      this.RoomType = FacilityGridHighlight.TYPE_ARMORY;
+      var _loc2_ = new flash.geom.Point(0,0);
+      this.roomOutline.titleAnchor.localToGlobal(_loc2_);
+      this.globalToLocal(_loc2_);
+      this.roomLabel._x = _loc2_.x;
+      this.roomLabel._y = _loc2_.y;
+      var _loc3_ = new flash.geom.Point(0,0);
+      this.roomOutline.footerAnchor.localToGlobal(_loc3_);
+      this.globalToLocal(_loc3_);
+      this.queueLabel._x = _loc3_.x;
+      this.queueLabel._y = _loc3_.y - this.queueLabel._height;
+   }
+   function alignCICTitle()
+   {
+      this.RoomType = FacilityGridHighlight.TYPE_CIC;
+      var _loc2_ = new flash.geom.Point(0,0);
+      this.roomOutline.titleAnchor.localToGlobal(_loc2_);
+      this.globalToLocal(_loc2_);
+      this.roomLabel._x = _loc2_.x;
+      this.roomLabel._y = _loc2_.y;
+      this.statusLabel._x = 0;
+      this.statusLabel._y = this.roomLabel._y + this.roomLabel._height + 2;
+   }
+   function alignPowerCoreTitle()
+   {
+      this.RoomType = FacilityGridHighlight.TYPE_POWERCORE;
+      var _loc2_ = new flash.geom.Point(0,0);
+      this.roomOutline.titleAnchor.localToGlobal(_loc2_);
+      this.globalToLocal(_loc2_);
+      this.roomLabel._x = _loc2_.x - (this.roomLabel.label.textWidth + 24);
+      this.roomLabel._y = _loc2_.y;
+      var _loc3_ = new flash.geom.Point(0,0);
+      this.roomOutline.footerAnchor.localToGlobal(_loc3_);
+      this.globalToLocal(_loc3_);
+      this.queueLabel._x = _loc3_.x - (this.queueLabel.label.textWidth + 22);
+      this.queueLabel._y = _loc3_.y - (this.queueLabel.label.textHeight + 5);
+   }
+   function alignCommanderTitle()
+   {
+      this.RoomType = FacilityGridHighlight.TYPE_COMMANDER;
+      var _loc2_ = new flash.geom.Point(0,0);
+      this.roomOutline.titleAnchor.localToGlobal(_loc2_);
+      this.globalToLocal(_loc2_);
+      this.roomLabel._x = _loc2_.x - (this.roomLabel.label.textWidth + 24);
+      this.roomLabel._y = _loc2_.y;
+      this.statusLabel._x = 0;
+      this.statusLabel._y = this.roomLabel._y + this.roomLabel._height + 2;
+   }
+   function alignEngineeringTitle()
+   {
+      this.RoomType = FacilityGridHighlight.TYPE_ENGINEERING;
+      var _loc2_ = new flash.geom.Point(0,0);
+      this.roomOutline.titleAnchor.localToGlobal(_loc2_);
+      this.globalToLocal(_loc2_);
+      this.roomLabel._x = _loc2_.x;
+      this.roomLabel._y = _loc2_.y;
+      this.statusLabel._x = 0;
+      this.statusLabel._y = this.roomLabel._y + this.roomLabel._height + 2;
+   }
+   function setBGColor(NewColor)
+   {
+      Colors.setColor(this.roomOutline,NewColor);
+   }
+   function setBorderAlpha(newAlpha)
+   {
+      this.roomLabel._alpha = newAlpha;
+      this.roomOutline._alpha = newAlpha;
+      this.construction._alpha = newAlpha;
+      this.clearing._alpha = newAlpha;
+      this.statusLabel._alpha = newAlpha;
+      this.queueLabel._alpha = newAlpha;
+   }
+   function onPopulateDebugData()
+   {
+      this.processMouseEvents();
+      this.setHighlighted(false);
+      this.setLabel("ROOM NAME HERE");
+      this.setStatus("Status Message","Queue Message rhfobfibiefbfb wwnnasd ahusdiusat sahisa");
+      this.setClearing(true);
+      this.setSize(300,200);
+   }
+   function alignRight()
+   {
+      this.isRightAligned = true;
+      this.roomLabel._x = (this.roomOutline._width - this.roomLabel._width) * 0.8;
+      this.roomLabel.label._x = this.roomLabel.bg._width - this.roomLabel.label.textWidth - 10;
+      var _loc2_ = new TextFormat();
+      _loc2_.align = "right";
+      this.statusLabel.label.multiline = true;
+      this.statusLabel.label.wordWrap = true;
+      this.statusLabel.label.setTextFormat(_loc2_);
+      this.statusLabel.label._x = -10;
+      this.statusLabel._x = this.roomOutline._width - this.statusLabel._width;
+      this.queueLabel._x = this.roomOutline._width - this.queueLabel._width;
+   }
+   function alignCenter()
+   {
+      this.isCenterAligned = true;
+      this.roomLabel._y = this.roomOutline._height * 0.41;
+      this.statusLabel._y = this.roomLabel._y + this.roomLabel._height + 2;
+   }
+}

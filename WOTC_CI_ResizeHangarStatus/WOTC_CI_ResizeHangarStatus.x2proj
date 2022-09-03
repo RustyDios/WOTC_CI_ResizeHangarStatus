@@ -1,0 +1,51 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Default" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Guid>5fc12642-ede1-477b-9aa1-a4129e949c6b</Guid>
+    <Name>WOTC_CI_ResizeHangarStatus</Name>
+    <Description>WOTC_CI_ResizeHangarStatus. I love Covert Infiltration but the huge long status display in the Hangar really got to me, even more so as at full zoom out still didn't display it all.
+
+This mod rectifies that by making the status wrap over four lines. 
+Also has config editable colours for the stats.</Description>
+    <SteamPublishID>0</SteamPublishID>
+    <AssemblyName>WOTC_CI_ResizeHangarStatus</AssemblyName>
+    <RootNamespace>WOTC_CI_ResizeHangarStatus</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Folder Include="Config\" />
+    <Folder Include="Localization\" />
+    <Folder Include="Src\" />
+    <Folder Include="Src\WOTC_CI_ResizeHangarStatus\" />
+    <Folder Include="Src\WOTC_CI_ResizeHangarStatus\Classes\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Localization\WOTC_CI_ResizeHangarStatus.esn">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Localization\WOTC_CI_ResizeHangarStatus.int">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Localization\WOTC_CI_ResizeHangarStatus.ita">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Localization\WOTC_CI_ResizeHangarStatus.rus">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="ReadMe.txt" />
+    <Content Include="ModPreview.jpg" />
+    <Content Include="Config\XComEditor.ini" />
+    <Content Include="Config\XComEngine.ini" />
+    <Content Include="Config\XComGame.ini" />
+    <Content Include="Src\WOTC_CI_ResizeHangarStatus\Classes\UIGeoscapeBarracksDisplay.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\WOTC_CI_ResizeHangarStatus\Classes\UISL_ShowBarracksGeoScape.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\WOTC_CI_ResizeHangarStatus\Classes\UISL_UIFacilityGrid_Rusty.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\WOTC_CI_ResizeHangarStatus\Classes\X2DownloadableContentInfo_WOTC_CI_ResizeHangarStatus.uc" />
+  </ItemGroup>
+  <Import Project="$(MSBuildLocalExtensionPath)\XCOM2.targets" />
+</Project>

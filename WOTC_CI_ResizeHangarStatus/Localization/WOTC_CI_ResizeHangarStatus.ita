@@ -1,0 +1,14 @@
+;new strings for the status display panel
+; they get appended with a : and #number
+; strSoldiers is also used as the title on the gesocape panel
+
+[X2DownloadableContentInfo_WOTC_CI_ResizeHangarStatus]
+strSoldiers=Stato Caserma
+strReady=Pronto
+strTired=Stanco
+strWounded=Ferito
+strInfiltrating=Sulle Infiltrazioni
+strOnCovertAction=Missioni Segrete
+strCaptured=Catturato
+strUnavailable=Non Disponibile
+strInHaven=Consulenti Rifugio
