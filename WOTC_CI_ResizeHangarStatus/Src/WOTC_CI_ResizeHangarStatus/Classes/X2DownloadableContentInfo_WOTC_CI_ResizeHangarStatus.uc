@@ -166,36 +166,49 @@ static function BarracksStatusReport_Rusty GetBarracksStatusReport_Rusty()
 	local array<XComGameState_Unit> Soldiers;
 	local XComGameState_Unit Soldier;
 	
+	//LWotC Tedster integration
+	local XComLWTuple Tuple;
+
+	//only create and pass around one tuple...
+	Tuple = new class'XComLWTuple';
+	Tuple.Id = 'GetLWUnitInfo';
+	Tuple.Data.Add(9);
+	Tuple.Data[0].kind = XComLWTVBool;		Tuple.Data[0].b = false;	//Is the unit an Officer
+	Tuple.Data[1].kind = XComLWTVInt;		Tuple.Data[1].i = -1;		//Officer Rank integer value
+	Tuple.Data[2].kind = XComLWTVString;	Tuple.Data[2].s = "";		//Officer Rank Full Name string
+	Tuple.Data[3].kind = XComLWTVString;	Tuple.Data[3].s = "";		//Officer Rank Short string
+	Tuple.Data[4].kind = XComLWTVString;	Tuple.Data[4].s = "";		//Officer Rank Icon Path
+	Tuple.Data[5].kind = XComLWTVBool;		Tuple.Data[5].b = false;	//Is a Haven Liason
+	Tuple.Data[6].kind = XComLWTVObject;	Tuple.Data[6].o = none;		//XComGameState_WorldRegion object for the region the unit is located in
+	Tuple.Data[7].kind = XComLWTVBool;		Tuple.Data[7].b = false;	//Is the unit Locked in their Haven
+	Tuple.Data[8].kind = XComLWTVBool;		Tuple.Data[8].b = false;	//Is this unit on a mission right now
+
 	//get all ALIVE xcom soldiers
 	Soldiers = `XCOMHQ.GetSoldiers();
 
 	//make a note of what they are currently doing
 	foreach Soldiers(Soldier)
 	{
+		//check LWotC Statuses for this unit
+		ResetTupleData(Tuple);
+		`XEVENTMGR.TriggerEvent('GetLWUnitInfo', Tuple, Soldier);
+
 		CurrentBarracksStatus.Total++;
 
 		if (Soldier.bCaptured)
 		{
 			CurrentBarracksStatus.Captured++;
 		}
-		else if (Soldier.GetStaffSlot() != none && Soldier.GetStaffSlot().GetMyTemplateName() == 'RM_CellStaffSlot' )
+		else if ((Soldier.GetStaffSlot() != none && Soldier.GetStaffSlot().GetMyTemplateName() == 'RM_CellStaffSlot') || Tuple.Data[5].b)
 		{
 			//due to how Lightweight Strategy Overhaul is just looking for a slot template name this check doesn't need to be gated behind a DLC check
+			//TupleData is a response from LWotC Beta by Tedster
 			CurrentBarracksStatus.InHaven++;
 		}
-		/*
-		else if (IsModActive('LWOTC') && `LWOUTPOSTMGR.IsUnitAHavenLiaison(Soldier.GetReference()))
-			{
-				CurrentBarracksStatus.InHaven++;
-			} 
-		else if (IsModActive('LWOTC') && `LWSQUADMGR.UnitIsOnMission(Soldier.GetReference()))
-			{
-				CurrentBarracksStatus.Infiltrating++;
-			} 
-		*/
-		else if (Soldier.GetStaffSlot() != none && Soldier.GetStaffSlot().GetMyTemplateName() == 'InfiltrationStaffSlot' )
+		else if ((Soldier.GetStaffSlot() != none && Soldier.GetStaffSlot().GetMyTemplateName() == 'InfiltrationStaffSlot') || Tuple.Data[8].b)
 		{
 			//due to how CI is just looking for a slot template name this check doesn't need to be gated behind a DLC check
+			//TupleData is a response from LWotC Beta by Tedster
 			CurrentBarracksStatus.Infiltrating++;
 		}
 		else if (Soldier.IsOnCovertAction())
@@ -226,6 +239,20 @@ static function BarracksStatusReport_Rusty GetBarracksStatusReport_Rusty()
 	}
 
 	return CurrentBarracksStatus;
+}
+	/////////////////////////////////////////////////////////////////
+
+static function ResetTupleData(out XComLWTuple Tuple)
+{
+	Tuple.Data[0].b = false;	//Is the unit an Officer
+	Tuple.Data[1].i = -1;		//Officer Rank integer value
+	Tuple.Data[2].s = "";		//Officer Rank Full Name string
+	Tuple.Data[3].s = "";		//Officer Rank Short string
+	Tuple.Data[4].s = "";		//Officer Rank Icon Path
+	Tuple.Data[5].b = false;	//Is a Haven Liason
+	Tuple.Data[6].o = none;		//XComGameState_WorldRegion object for the region the unit is located in
+	Tuple.Data[7].b = false;	//Is the unit Locked in their Haven
+	Tuple.Data[8].b = false;	//Is this unit on a mission right now
 }
 
 	/////////////////////////////////////////////////////////////////
