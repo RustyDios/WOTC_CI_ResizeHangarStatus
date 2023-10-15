@@ -31,6 +31,8 @@ var config string    HexSoldiers, HexReady, HexTired, HexWounded, HexInfiltratin
 
 var config bool bEnableLogging, bAvengerIsOneLinePerStat, bEnableOnAvenger;
 
+var config array<name> StaffSlotNames_Haven, StaffSlotNames_Infil;
+
 static event OnLoadedSavedGame(){}
 
 static event InstallNewCampaign(XComGameState StartState){}
@@ -165,7 +167,8 @@ static function BarracksStatusReport_Rusty GetBarracksStatusReport_Rusty()
 	local BarracksStatusReport_Rusty CurrentBarracksStatus;
 	local array<XComGameState_Unit> Soldiers;
 	local XComGameState_Unit Soldier;
-	
+	local name StaffSlotTemplateName;
+
 	//LWotC Tedster integration
 	local XComLWTuple Tuple;
 
@@ -199,17 +202,22 @@ static function BarracksStatusReport_Rusty GetBarracksStatusReport_Rusty()
 		{
 			CurrentBarracksStatus.Captured++;
 		}
-		else if ((Soldier.GetStaffSlot() != none && Soldier.GetStaffSlot().GetMyTemplateName() == 'RM_CellStaffSlot') || Tuple.Data[5].b)
+		else if (Soldier.GetStaffSlot() != none)
 		{
-			//due to how Lightweight Strategy Overhaul is just looking for a slot template name this check doesn't need to be gated behind a DLC check
-			//TupleData is a response from LWotC Beta by Tedster
-			CurrentBarracksStatus.InHaven++;
-		}
-		else if ((Soldier.GetStaffSlot() != none && Soldier.GetStaffSlot().GetMyTemplateName() == 'InfiltrationStaffSlot') || Tuple.Data[8].b)
-		{
-			//due to how CI is just looking for a slot template name this check doesn't need to be gated behind a DLC check
-			//TupleData is a response from LWotC Beta by Tedster
-			CurrentBarracksStatus.Infiltrating++;
+			StaffSlotTemplateName = Soldier.GetStaffSlot().GetMyTemplateName();
+
+			//due to how some mods are using unique staff slot names we can just look for a slot template name, this check doesn't need to be gated behind a DLC check
+			//TupleData is a response from LWotC by Tedster
+			//sent to config list check
+			if ( Tuple.Data[5].b || default.StaffSlotNames_Haven.Find(StaffSlotTemplateName) != INDEX_NONE )
+			{
+				CurrentBarracksStatus.InHaven++;
+			}
+
+			if ( Tuple.Data[8].b || default.StaffSlotNames_Infil.Find(StaffSlotTemplateName) != INDEX_NONE )
+			{
+				CurrentBarracksStatus.Infiltrating++;
+			}
 		}
 		else if (Soldier.IsOnCovertAction())
 		{
@@ -257,9 +265,9 @@ static function ResetTupleData(out XComLWTuple Tuple)
 
 	/////////////////////////////////////////////////////////////////
 
+//colour a html string by hex value input
 static function string ColourText(string strValue, string strColour)
 {
-	//colour a html string by hex value input
 	return "<font color='#" $ strColour $ "'>" $ strValue $ "</font>";
 }
 

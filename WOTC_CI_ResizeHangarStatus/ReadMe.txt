@@ -36,8 +36,7 @@ It appears that sometimes the avenger tooltip doesn't initialise correctly. I th
 
 [url=https://steamcommunity.com/sharedfiles/filedetails/?id=1545241386] Lightweight Strategy Overhaul [/url] Resistance/Advisor/Cell shows as "Haven Advisor" ..
 
-For LWOTC soldiers 'On Infiltration' will show as 'On Covert Action'. This is due to how LWOTC sets it's infiltration status different to how Covert Infiltration does (and this mod was initially designed for CI). I am working hard to bring all the features to LWOTC but find building for LWOTC a difficult process. When I can figure out how to correctly account for LWotC I will update.
-Works with the [url=https://steamcommunity.com/sharedfiles/filedetails/?id=2984064431] LWOTC BETA [/url] by Tedster.
+Works with [url=https://steamcommunity.com/sharedfiles/filedetails/?id=2683996590] LWOTC [/url] and [url=https://steamcommunity.com/sharedfiles/filedetails/?id=2567230730] CI [/url]
 
 [h1]Credits and Thanks[/h1]
 Many thanks to [b]MrNiceUK[/b], [b]kdm2k6[/b] and [b]-bg-[/b]for the UI/flash aspect help
