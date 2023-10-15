@@ -200,21 +200,31 @@ static function BarracksStatusReport_Rusty GetBarracksStatusReport_Rusty()
 
 		if (Soldier.bCaptured)
 		{
+			//Vanilla capture includes by Advent and Chosen
 			CurrentBarracksStatus.Captured++;
+		}
+		else if (Tuple.Data[5].b)
+		{
+			//TupleData is a response from LWotC
+			CurrentBarracksStatus.InHaven++;
+		}
+		else if (Tuple.Data[8].b)
+		{
+			//TupleData is a response from LWotC
+			CurrentBarracksStatus.Infiltrating++;
 		}
 		else if (Soldier.GetStaffSlot() != none)
 		{
 			StaffSlotTemplateName = Soldier.GetStaffSlot().GetMyTemplateName();
 
 			//due to how some mods are using unique staff slot names we can just look for a slot template name, this check doesn't need to be gated behind a DLC check
-			//TupleData is a response from LWotC by Tedster
 			//sent to config list check
-			if ( Tuple.Data[5].b || default.StaffSlotNames_Haven.Find(StaffSlotTemplateName) != INDEX_NONE )
+			if (default.StaffSlotNames_Haven.Find(StaffSlotTemplateName) != INDEX_NONE )
 			{
 				CurrentBarracksStatus.InHaven++;
 			}
 
-			if ( Tuple.Data[8].b || default.StaffSlotNames_Infil.Find(StaffSlotTemplateName) != INDEX_NONE )
+			if (default.StaffSlotNames_Infil.Find(StaffSlotTemplateName) != INDEX_NONE )
 			{
 				CurrentBarracksStatus.Infiltrating++;
 			}
