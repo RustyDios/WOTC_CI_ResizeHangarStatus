@@ -192,53 +192,50 @@ static function BarracksStatusReport_Rusty GetBarracksStatusReport_Rusty()
 	//make a note of what they are currently doing
 	foreach Soldiers(Soldier)
 	{
+		//Add to total unit count
+		CurrentBarracksStatus.Total++;
+
 		//check LWotC Statuses for this unit
 		ResetTupleData(Tuple);
 		`XEVENTMGR.TriggerEvent('GetLWUnitInfo', Tuple, Soldier);
 
-		CurrentBarracksStatus.Total++;
+		//Check for a staffed location
+		//due to how some mods are using unique staff slot names we can just look for a slot template name, this check doesn't need to be gated behind a DLC check
+		StaffSlotTemplateName = '';
+		if (Soldier.GetStaffSlot() != none)
+		{
+			StaffSlotTemplateName = Soldier.GetStaffSlot().GetMyTemplateName();
+		}
 
+		// ===== BEGIN FILTERING =====
 		if (Soldier.bCaptured)
 		{
 			//Vanilla capture includes by Advent and Chosen
 			CurrentBarracksStatus.Captured++;
 		}
-		else if (Tuple.Data[5].b)
+		else if (Tuple.Data[5].b || default.StaffSlotNames_Haven.Find(StaffSlotTemplateName) != INDEX_NONE )
 		{
-			//TupleData is a response from LWotC
+			//Tuple data response from LWotC or in config list of Staff Slot names
 			CurrentBarracksStatus.InHaven++;
 		}
-		else if (Tuple.Data[8].b)
+		else if (Tuple.Data[8].b || default.StaffSlotNames_Infil.Find(StaffSlotTemplateName) != INDEX_NONE )
 		{
-			//TupleData is a response from LWotC
+			//Tuple data response from LWotC or in config list of Staff Slot names
 			CurrentBarracksStatus.Infiltrating++;
-		}
-		else if (Soldier.GetStaffSlot() != none)
-		{
-			StaffSlotTemplateName = Soldier.GetStaffSlot().GetMyTemplateName();
-
-			//due to how some mods are using unique staff slot names we can just look for a slot template name, this check doesn't need to be gated behind a DLC check
-			//sent to config list check
-			if (default.StaffSlotNames_Haven.Find(StaffSlotTemplateName) != INDEX_NONE )
-			{
-				CurrentBarracksStatus.InHaven++;
-			}
-
-			if (default.StaffSlotNames_Infil.Find(StaffSlotTemplateName) != INDEX_NONE )
-			{
-				CurrentBarracksStatus.Infiltrating++;
-			}
 		}
 		else if (Soldier.IsOnCovertAction())
 		{
+			//Covert actions
 			CurrentBarracksStatus.OnCovertAction++;
 		}
 		else if (Soldier.IsInjured())
 		{
+			//any and all wounds
 			CurrentBarracksStatus.Wounded++;
 		}
 		else if (Soldier.CanGoOnMission())
 		{
+			//Can go on mission, tired or ready
 			if (Soldier.GetMentalState() == eMentalState_Tired)
 			{
 				CurrentBarracksStatus.Tired++;
@@ -250,8 +247,8 @@ static function BarracksStatusReport_Rusty GetBarracksStatusReport_Rusty()
 		}
 		else
 		{
-			//so this counts gts training, psi training, bond training, pexm testing, soldier conditioning etc etc
-			//basically anyone that can't go on a mission and doesn't fit the above criteria
+			//so this counts shaken, gts training, psi training, bond training, pexm testing, soldier conditioning etc etc
+			//basically anyone that can't go on a mission and doesn't fit any of the above criteria
 			CurrentBarracksStatus.Unavailable++;
 		}
 	}
