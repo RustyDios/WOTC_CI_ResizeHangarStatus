@@ -398,6 +398,7 @@ simulated event Removed()
 
 ///////////////////////////////////////////////////////////////////////////////
 //  COMMAND TO BRING UP THE MENU
+//	SEE ALSO THE UISL FOR HANDLEINPUT
 ///////////////////////////////////////////////////////////////////////////////
 
 simulated function bool OnUnrealCommand(int cmd, int arg)
@@ -408,7 +409,7 @@ simulated function bool OnUnrealCommand(int cmd, int arg)
 
 	switch( cmd )
 	{
-		case class'UIUtilities_Input'.const.FXS_BUTTON_R3:
+		case class'UIUtilities_Input'.const.FXS_DPAD_DOWN:
 			`HQPRES.UIPersonnel_LivingQuarters(OnPersonnelSelected);
 			break;
 	}

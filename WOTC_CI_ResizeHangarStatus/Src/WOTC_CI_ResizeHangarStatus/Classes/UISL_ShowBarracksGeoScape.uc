@@ -2,7 +2,7 @@
 //  FILE:   Show Barracks Status On Geo by RustyDios                           
 //  
 //	File CREATED	31/08/21    01:00
-//	LAST UPDATED    05/09/21	12:00
+//	LAST UPDATED    09/02/24	23:00
 //
 //	ADDS A NEW PANEL TO THE GEOSCAPE THAT DISPLAYS THE BARRACKS STATUS
 //  CODED WITH HELP FROM XYMANEK
@@ -51,6 +51,7 @@ event OnInit(UIScreen Screen)
 			}
 
 			//GBD.UpdateGeoBarracksText(); called from the Init, stop putting it back in here!!
+			HandleInput(true);
 		}
 		else
 		{
@@ -75,6 +76,8 @@ event OnLoseFocus(UIScreen Screen)
 				//geoscape not in focus hide the screen, fast
 				GBD.Hide();
 			}
+		
+			HandleInput(false);
 		}
 	}
 }
@@ -96,15 +99,61 @@ event OnReceiveFocus(UIScreen Screen)
 				GBD.UpdateGeoBarracksText();
 				GBD.Show();
 			}
+		
+			HandleInput(true);
 		}
 	}
 }
 
-// This event is triggered when a screen is removed - not required per Xymaneks instructions
-//event OnRemoved(UIScreen Screen);
+// This event is triggered when a screen is removed
+event OnRemoved(UIScreen screen)
+{
+	if (UIStrategyMap(Screen) == none) return;
+	
+	HandleInput(false);
+}
+
+//SEETUP CONTROLLER SUPPORT FOR GEOSCAPE
+function HandleInput(bool isSubscribing)
+{
+	local delegate<UIScreenStack.CHOnInputDelegate> inputDelegate;
+	inputDelegate = OnUnrealCommand;
+
+	if(isSubscribing)
+	{
+		`SCREENSTACK.SubscribeToOnInput(inputDelegate);
+	}
+	else
+	{
+		`SCREENSTACK.UnsubscribeFromOnInput(inputDelegate);
+	}
+}
+
+static protected function bool OnUnrealCommand(int cmd, int arg)
+{
+	// Only pay attention to presses or repeats; ignoring other input types
+	if (cmd == class'UIUtilities_Input'.const.FXS_BUTTON_R3 && arg == class'UIUtilities_Input'.const.FXS_ACTION_HOLD)
+	{
+		// Cannot open screen during flight
+		if (`HQPRES.StrategyMap2D.m_eUIState != eSMS_Flight)
+		{
+			`HQPRES.UIPersonnel_LivingQuarters(OnPersonnelSelected);
+		}
+
+		return true;
+	}
+
+	return `SCREENSTACK.GetCurrentScreen().OnUnrealCommand(cmd, arg);
+}
+
+simulated function OnPersonnelSelected(StateObjectReference selectedUnitRef)
+{
+	//TODO: add any logic here for selecting someone from the geoscape .. default nothing
+	`SCREENSTACK.GetCurrentScreen().Movie.Pres.PlayUISound(eSUISound_MenuClickNegative);
+}
 
 //////////////////////////////////////////////////////////
-//defaultproperties
-//{	
-//	ScreenClass = 'UIStrategyMap';
-//}
+defaultproperties
+{	
+	ScreenClass = none
+}
