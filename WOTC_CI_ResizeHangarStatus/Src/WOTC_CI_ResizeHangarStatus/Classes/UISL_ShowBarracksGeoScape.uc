@@ -15,7 +15,7 @@ var config int PANEL_ANCHOR_X_GEO_CB, PANEL_WIDTH_GEO_CB, PANEL_HEIGHT_GEO_CB;
 var config int PANEL_ANCHOR_X_GEO_ST, PANEL_WIDTH_GEO_ST, PANEL_HEIGHT_GEO_ST;
 var config int PANEL_ANCHOR_X_GEO_FL, PANEL_WIDTH_GEO_FL, PANEL_HEIGHT_GEO_FL;
 
-var config bool bEnableOnGeoscape, bGeoIsSingleLinePerStat, bGeoIsFLatLine;
+//var config bool bEnableOnGeoscape, bGeoIsSingleLinePerStat, bGeoIsFlatLine;
 
 ///////////////////////////////////////////////////////////////////////////////
 //  SCREEN MANIPULATION
@@ -28,26 +28,26 @@ event OnInit(UIScreen Screen)
 
 	if (Screen.IsA(class'UIStrategyMap'.Name))
 	{
-		if (default.bEnableOnGeoscape)
+		if (class'X2DownloadableContentInfo_WOTC_CI_ResizeHangarStatus'.default.bEnableOnGeoscape)
 		{
 			GBD = Screen.Spawn(class'UIGeoscapeBarracksDisplay', Screen);
 			`LOG("Screen was one we wanted on init  ::" @Screen.Class.Name , class'X2DownloadableContentInfo_WOTC_CI_ResizeHangarStatus'.default.bEnableLogging,'RustyShowBarracksGeo');
 
 			//check mode and set default sizes ... init display. xpos, ypos, width, height, singleline, flatline
-			if (default.bGeoIsFLatLine)
+			if (class'X2DownloadableContentInfo_WOTC_CI_ResizeHangarStatus'.default.bGeoscapeIsFlatLine)
 			{
 				`LOG("SETUP PANEL FOR FLATLINE" , class'X2DownloadableContentInfo_WOTC_CI_ResizeHangarStatus'.default.bEnableLogging,'RustyShowBarracksGeo');
-				GBD.InitBarracksDisplay(default.PANEL_ANCHOR_Y_GEO, default.PANEL_ANCHOR_X_GEO_FL, default.PANEL_WIDTH_GEO_FL, default.PANEL_HEIGHT_GEO_FL, false, true);
+				GBD.InitBarracksDisplay(default.PANEL_ANCHOR_Y_GEO, default.PANEL_ANCHOR_X_GEO_FL, default.PANEL_WIDTH_GEO_FL, default.PANEL_HEIGHT_GEO_FL);
 			}
-			else if (default.bGeoIsSingleLinePerStat)
+			else if (class'X2DownloadableContentInfo_WOTC_CI_ResizeHangarStatus'.default.bGeoscapeIsOneLinePerStat)
 			{
 				`LOG("SETUP PANEL FOR STACK" , class'X2DownloadableContentInfo_WOTC_CI_ResizeHangarStatus'.default.bEnableLogging,'RustyShowBarracksGeo');
-				GBD.InitBarracksDisplay(default.PANEL_ANCHOR_Y_GEO, default.PANEL_ANCHOR_X_GEO_ST, default.PANEL_WIDTH_GEO_ST, default.PANEL_HEIGHT_GEO_ST, true, false );
+				GBD.InitBarracksDisplay(default.PANEL_ANCHOR_Y_GEO, default.PANEL_ANCHOR_X_GEO_ST, default.PANEL_WIDTH_GEO_ST, default.PANEL_HEIGHT_GEO_ST);
 			}
 			else
 			{
 				`LOG("SETUP PANEL FOR COMPACT" , class'X2DownloadableContentInfo_WOTC_CI_ResizeHangarStatus'.default.bEnableLogging,'RustyShowBarracksGeo');
-				GBD.InitBarracksDisplay(default.PANEL_ANCHOR_Y_GEO, default.PANEL_ANCHOR_X_GEO_CB, default.PANEL_WIDTH_GEO_CB, default.PANEL_HEIGHT_GEO_CB , false, false );
+				GBD.InitBarracksDisplay(default.PANEL_ANCHOR_Y_GEO, default.PANEL_ANCHOR_X_GEO_CB, default.PANEL_WIDTH_GEO_CB, default.PANEL_HEIGHT_GEO_CB);
 			}
 
 			//GBD.UpdateGeoBarracksText(); called from the Init, stop putting it back in here!!
@@ -67,7 +67,7 @@ event OnLoseFocus(UIScreen Screen)
 
 	if (Screen.IsA(class'UIStrategyMap'.Name))
 	{
-		if (default.bEnableOnGeoscape)
+		if (class'X2DownloadableContentInfo_WOTC_CI_ResizeHangarStatus'.default.bEnableOnGeoscape)
 		{
 			GBD = UIGeoscapeBarracksDisplay(Screen.GetChildByName(class'UIGeoscapeBarracksDisplay'.const.PanelName, false));
 
@@ -89,7 +89,7 @@ event OnReceiveFocus(UIScreen Screen)
 
 	if (Screen.IsA(class'UIStrategyMap'.Name))
 	{
-		if (default.bEnableOnGeoscape)
+		if (class'X2DownloadableContentInfo_WOTC_CI_ResizeHangarStatus'.default.bEnableOnGeoscape)
 		{
 			GBD = UIGeoscapeBarracksDisplay(Screen.GetChildByName(class'UIGeoscapeBarracksDisplay'.const.PanelName, false));
 

@@ -29,7 +29,11 @@ event OnInit(UIScreen Screen)
             if( FacilityOverlay.GetFacility().GetMyTemplateName() == 'Hangar' )
             {
                 //check mode and set default sizes
-                if (class'X2DownloadableContentInfo_WOTC_CI_ResizeHangarStatus'.default.bAvengerIsOneLinePerStat)
+                if (class'X2DownloadableContentInfo_WOTC_CI_ResizeHangarStatus'.default.bAvengerIsFlatLine)
+                {
+                    //intentionally no change
+                }
+                else if (class'X2DownloadableContentInfo_WOTC_CI_ResizeHangarStatus'.default.bAvengerIsOneLinePerStat)
                 {
                     FacilityOverlay.MC.ChildSetNum("queueLabel.bg", "_width", 275);
                     FacilityOverlay.MC.ChildSetNum("queueLabel.bg", "_height", 140);
@@ -62,8 +66,8 @@ event OnReceiveFocus(UIScreen Screen)
             if( FacilityOverlay.GetFacility().GetMyTemplateName() == 'Hangar' )
             {
                 //set Panel to adjust to text
-                FacilityOverlay.MC.ChildSetBool("queueLabel.label","multiline", true);
                 //FacilityOverlay.MC.ChildSetBool("queueLabel.label", "wordWrap", true);
+                FacilityOverlay.MC.ChildSetBool("queueLabel.label","multiline", true);
                 FacilityOverlay.MC.ChildSetBool("queueLabel.label", "autoSize", true);
 
                 //set BG to match panel text

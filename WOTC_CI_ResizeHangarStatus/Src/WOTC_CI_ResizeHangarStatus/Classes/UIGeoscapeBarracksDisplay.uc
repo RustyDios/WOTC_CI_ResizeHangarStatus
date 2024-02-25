@@ -19,10 +19,14 @@ var UIButton GeoBarracksButton;
 var UIX2PanelHeader GeoBarracksTitleHeader;
 var UITextContainer GeoBarracksTextDescription;
 
-var bool bSingleLine, bFlatLine, bEnableLogging;
+var bool bStackedLines, bFlatLine, bEnableLogging;
 
 var string strSoldiers, strReady, strTired, strWounded, strInfiltrating, strOnCovertAction, strUnavailable, strCaptured, strInHaven;
 var string HexSoldiers, HexReady, HexTired, HexWounded, HexInfiltrating, HexOnCovertAction, HexUnavailable, HexCaptured, HexInHaven;
+
+var string strBusy, HexBusy;
+
+var array<string> FormatOrderF, FormatOrderS, FormatOrderG1, FormatOrderG2, FormatOrderG3;
 
 // Watch handle, to automatically hide panel if ComVid is on
 var int ComVidWatch;
@@ -33,11 +37,8 @@ function InitBarracksDisplay (int AnchorY, int AnchorX, int PanelW, int PanelH, 
 
 	CopySettingsFromDLCinfo();
 
-	bSingleLine = IsSingleLine;
-	bFlatline = IsFlatline;
-
     // Init the elements
-    AddPanel(AnchorY,AnchorX,PanelW,PanelH);
+    AddPanel(AnchorY, AnchorX, PanelW, PanelH);
 
     // initial Update
     UpdateGeoBarracksText();
@@ -53,6 +54,13 @@ simulated function CopySettingsFromDLCInfo()
 	//logging toggle
 	bEnableLogging		= class'X2DownloadableContentInfo_WOTC_CI_ResizeHangarStatus'.default.bEnableLogging;
 
+	//style toggles
+	bStackedLines		= class'X2DownloadableContentInfo_WOTC_CI_ResizeHangarStatus'.default.bGeoscapeIsOneLinePerStat;
+	bFlatline			= class'X2DownloadableContentInfo_WOTC_CI_ResizeHangarStatus'.default.bGeoscapeIsFlatLine;
+
+	//title colour
+	//ReadyThreshold		= class'X2DownloadableContentInfo_WOTC_CI_ResizeHangarStatus'.default.ReadyThreshold;
+
 	//title
 	strSoldiers			= class'X2DownloadableContentInfo_WOTC_CI_ResizeHangarStatus'.default.strSoldiers;
 
@@ -65,6 +73,7 @@ simulated function CopySettingsFromDLCInfo()
 	strUnavailable		= class'X2DownloadableContentInfo_WOTC_CI_ResizeHangarStatus'.default.strUnavailable;
 	strCaptured			= class'X2DownloadableContentInfo_WOTC_CI_ResizeHangarStatus'.default.strCaptured;
 	strInHaven			= class'X2DownloadableContentInfo_WOTC_CI_ResizeHangarStatus'.default.strInHaven;
+	strBusy				= class'X2DownloadableContentInfo_WOTC_CI_ResizeHangarStatus'.default.strBusy;
 
 	//colours
 	HexSoldiers			= class'X2DownloadableContentInfo_WOTC_CI_ResizeHangarStatus'.default.HexSoldiers;
@@ -75,8 +84,14 @@ simulated function CopySettingsFromDLCInfo()
 	HexOnCovertAction	= class'X2DownloadableContentInfo_WOTC_CI_ResizeHangarStatus'.default.HexOnCovertAction;
 	HexUnavailable		= class'X2DownloadableContentInfo_WOTC_CI_ResizeHangarStatus'.default.HexUnavailable;
 	HexCaptured			= class'X2DownloadableContentInfo_WOTC_CI_ResizeHangarStatus'.default.HexCaptured;
-	HexInHaven			= class'X2DownloadableContentInfo_WOTC_CI_ResizeHangarStatus'.default.HexInHaven;
+	HexBusy				= class'X2DownloadableContentInfo_WOTC_CI_ResizeHangarStatus'.default.HexBusy;
 
+	//orders
+	FormatOrderF 		= class'X2DownloadableContentInfo_WOTC_CI_ResizeHangarStatus'.default.FormatOrderF;
+	FormatOrderS 		= class'X2DownloadableContentInfo_WOTC_CI_ResizeHangarStatus'.default.FormatOrderS;
+	FormatOrderG1 		= class'X2DownloadableContentInfo_WOTC_CI_ResizeHangarStatus'.default.FormatOrderG1;
+	FormatOrderG2 		= class'X2DownloadableContentInfo_WOTC_CI_ResizeHangarStatus'.default.FormatOrderG2;
+	FormatOrderG3 		= class'X2DownloadableContentInfo_WOTC_CI_ResizeHangarStatus'.default.FormatOrderG3;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -99,7 +114,7 @@ simulated function AddPanel(int AnchorY, int AnchorX, int PanelW, int PanelH)
 
     //setup the text panel title
 	GeoBarracksTitleHeader = Spawn(class'UIX2PanelHeader', GeoBarracksText);
-	GeoBarracksTitleHeader.InitPanelHeader('ShowGeoBarracksText_GeoBarracksTitle', class'UIUtilities_Text'.static.GetColoredText(strSoldiers, GetTitleColor(), 28), "");
+	GeoBarracksTitleHeader.InitPanelHeader('ShowGeoBarracksText_GeoBarracksTitle', class'UIUtilities_Text'.static.GetColoredText(strSoldiers, eUIState_Header, 28), "");
 	GeoBarracksTitleHeader.SetPosition(GeoBarracksTitleHeader.X + 10, GeoBarracksTitleHeader.Y + 10);
 	GeoBarracksTitleHeader.SetHeaderWidth(GeoBarracksText.Width - 20);
 	GeoBarracksTitleHeader.bRealizeOnSetText = true;	//allows recolouring of the title based on status
@@ -118,7 +133,7 @@ simulated function AddPanel(int AnchorY, int AnchorX, int PanelW, int PanelH)
 	GeoBarracksSplitLine.SetSize( GeoBarracksTextBG.Width - 20, 2 );
     GeoBarracksSplitLine.SetAlpha( 15 );
 
-	if (bSingleLine)
+	if (bStackedLines)
 	{
 		//Set Icon for Stacked Single Line compressed block .. why - 26? ... icon size 24 .. icon padding 2
 		GeoBarracksButton.SetPosition( GeoBarracksButton.X + (PanelW - 26), GeoBarracksButton.Y + (GeoBarracksTitleHeader.Height / 4) );
@@ -173,123 +188,104 @@ simulated function OnPersonnelSelected(StateObjectReference selectedUnitRef)
 //  UPDATING TEXT
 ///////////////////////////////////////////////////////////////////////////////
 
+simulated function string AddPartsInOrder(array<string> FormatOrder, array<string> LocalOrder, string Separator, optional bool bAlwaysAddSeparator)
+{
+	local string strStatus, locOrder;
+	local int i;
+
+	strStatus = "";
+
+	for (i = 0 ; i < FormatOrder.length ; i++)
+	{
+		foreach LocalOrder(locOrder)
+		{
+			if (InStr(locOrder, FormatOrder[i]) != INDEX_NONE)
+			{
+				strStatus $= locOrder;
+
+				if (i < FormatOrder.length -1 || bAlwaysAddSeparator)
+				{
+					strStatus $= Separator;
+				}
+				continue;
+			}
+		}
+	}
+
+	return strStatus;
+}
+
 //update and change the text based on current barracks info
 simulated function UpdateGeoBarracksText()
 {
 	local BarracksStatusReport_Rusty CurrentBarracksStatus;
-	local string strStatus;
+	local string strStatus, MultiLine1, MultiLine2, MultiLine3;
+	local array<string> LocalOrder;
 
 	//get report of all xcom HQ soldiers current activities
 	CurrentBarracksStatus = class'X2DownloadableContentInfo_WOTC_CI_ResizeHangarStatus'.static.GetBarracksStatusReport_Rusty();
 
+	//set up strings
 	strStatus = "";
+
+ 	/* Ready */ 	LocalOrder.AddItem(ColourText(strReady, CurrentBarracksStatus.Ready, HexReady));
+	/* Tired */ 	LocalOrder.AddItem(ColourText(strTired, CurrentBarracksStatus.Tired, HexTired));
+	/* Wounded */	LocalOrder.AddItem(ColourText(strWounded, CurrentBarracksStatus.Wounded, HexWounded));
+	/* Infil */ 	LocalOrder.AddItem(ColourText(strInfiltrating, CurrentBarracksStatus.Infiltrating, HexInfiltrating));
+	/* OnCA */		LocalOrder.AddItem(ColourText(strOnCovertAction, CurrentBarracksStatus.OnCovertAction, HexOnCovertAction));
+	/* UA */ 		LocalOrder.AddItem(ColourText(strUnavailable, CurrentBarracksStatus.Unavailable, HexUnavailable));
+	/* Busy */		LocalOrder.AddItem(ColourText(strBusy, CurrentBarracksStatus.Busy, HexBusy));
+
+	//only show if you have advisors in havens or captured units
+	/* Haven */		if (CurrentBarracksStatus.InHaven > 0)
+					{
+						LocalOrder.AddItem(ColourText(strInHaven, CurrentBarracksStatus.InHaven, HexInHaven));
+					}
+
+	/* Captured */	if (CurrentBarracksStatus.Captured > 0)
+					{
+						LocalOrder.AddItem(ColourText(strCaptured, CurrentBarracksStatus.Captured, HexCaptured));
+					}
 
 	//check mode and formulate correct string response
 	if (bFlatLine)
 	{
 		//all one line -- text: # , text: # , text: # , text: # , text: # , text: # , text: # , text: #
-		strStatus $= 		 ColourText(strReady $ ":" @ CurrentBarracksStatus.Ready, HexReady);
-		strStatus $= " , " $ ColourText(strTired $ ":" @ CurrentBarracksStatus.Tired, HexTired);
-		strStatus $= " , " $ ColourText(strWounded $ ":" @ CurrentBarracksStatus.Wounded, HexWounded);
-			//insert DLC check for CI or LWotC ?
-		strStatus $= " , " $ ColourText(strInfiltrating $ ":" @ CurrentBarracksStatus.Infiltrating, HexInfiltrating);
-			//end DLC check
-		strStatus $= " , " $ ColourText(strOnCovertAction $ ":" @ CurrentBarracksStatus.OnCovertAction, HexOnCovertAction);
-		strStatus $= " , " $ ColourText(strUnavailable $ ":" @ CurrentBarracksStatus.Unavailable, HexUnavailable);
-		
-		//only show if you have advisors in havens
-		if (CurrentBarracksStatus.InHaven > 0)
-		{
-			strStatus $= " , " $ ColourText(default.strInHaven $ ":" @ CurrentBarracksStatus.InHaven, default.HexInHaven);
-		}
+		strStatus $= AddPartsInOrder(FormatOrderF, LocalOrder, " , " );
 
-		//only show captured if you have captured
-		if (CurrentBarracksStatus.Captured > 0)
-		{
-			strStatus $= " , " $ ColourText(strCaptured $ ":" @ CurrentBarracksStatus.Captured, HexCaptured);
-		}
-
-		`LOG("Geoscape Barracks Status Display Flat Line Active",bEnableLogging,'RustyShowBarracksGeo');
+		`LOG("Geoscape Barracks Status Display Flat Line Active", bEnableLogging,'RustyShowBarracksGeo');
 	}
-	else if (bSingleLine)
+	else if (bStackedLines)
 	{
 		//single line stacked each line -- # : text
-		strStatus $= 		ColourText(CurrentBarracksStatus.Ready @ ":" @ strReady, HexReady);
-		strStatus $= "\n" $ ColourText(CurrentBarracksStatus.Tired @ ":" @ strTired, HexTired);
-		strStatus $= "\n" $	ColourText(CurrentBarracksStatus.Wounded @ ":" @ strWounded, HexWounded);
-			//insert DLC check for CI or LWotC ?
-		strStatus $= "\n" $	ColourText(CurrentBarracksStatus.Infiltrating @ ":" @ strInfiltrating, HexInfiltrating);
-			//end DLC check
-		strStatus $= "\n" $	ColourText(CurrentBarracksStatus.OnCovertAction @ ":" @ strOnCovertAction, HexOnCovertAction);
-		strStatus $= "\n" $	ColourText(CurrentBarracksStatus.Unavailable @ ":" @ strUnavailable, HexUnavailable);
+		strStatus $= AddPartsInOrder(FormatOrderS, LocalOrder, "\n" );
 
-		//only show if you have advisors in havens
-		if (CurrentBarracksStatus.InHaven > 0)
-		{
-			strStatus $= "\n" $ ColourText(CurrentBarracksStatus.InHaven @ ":" @ strInHaven, HexInHaven);
-		}
-
-		//only show captured if you have captured
-		if (CurrentBarracksStatus.Captured > 0)
-		{
-			strStatus $= "\n" $ ColourText(CurrentBarracksStatus.Captured @ ":" @ strCaptured, HexCaptured);
-		}
-
-		`LOG("Geoscape Barracks Status Display Single Stack Active",bEnableLogging,'RustyShowBarracksGeo');
+		`LOG("Geoscape Barracks Status Display Single Stack Active", bEnableLogging,'RustyShowBarracksGeo');
 	}
 	else
 	{
-		//Compact Block multiline layout
+		//Compact Block multiline layout, over 3 lines
 		//	U/a XX , [Haven Advisor xx] , (Captured xx), 
 		//	Infiltrating xx, Covert Action xx
 		//	Ready xx, Tired xx, Wounded xx
+		MultiLine1 = AddPartsInOrder(FormatOrderG1, LocalOrder, " , ", true );
+		MultiLine2 = AddPartsInOrder(FormatOrderG2, LocalOrder, " , ", true ); 
+		MultiLine3 = AddPartsInOrder(FormatOrderG3, LocalOrder, " , "); 
 
-		strStatus $= ColourText(strUnavailable $ ":" @ CurrentBarracksStatus.Unavailable, HexUnavailable);
+		strStatus $= MultiLine1; if (MultiLine1 != "") { strStatus $= "\n"; }
+		strStatus $= MultiLine2; if (MultiLine2 != "") { strStatus $= "\n"; }
+		strStatus $= MultiLine3;
 
-		//only show if you have advisors in havens
-		if (CurrentBarracksStatus.InHaven > 0)
-		{
-			strStatus $= " , " $ ColourText(strInHaven $ ":" @ CurrentBarracksStatus.InHaven, HexInHaven);
-		}
-
-		//only show captured if you have captured
-		if (CurrentBarracksStatus.Captured > 0)
-		{
-			strStatus $= " , " $ ColourText(strCaptured $ ":" @ CurrentBarracksStatus.Captured, HexCaptured);
-		}
-
-			//Insert if DLC for CI or LWotC ?
-		strStatus $= "\n" $ ColourText(strInfiltrating $ ":" @ CurrentBarracksStatus.Infiltrating, HexInfiltrating);
-			//end DLC Check
-		strStatus $= " , " $ ColourText(strOnCovertAction $ ":" @ CurrentBarracksStatus.OnCovertAction, HexOnCovertAction);
-
-		strStatus $= "\n" $ ColourText(strReady $ ":" @ CurrentBarracksStatus.Ready, HexReady);
-		strStatus $= " , " $ ColourText(strTired $ ":" @ CurrentBarracksStatus.Tired, HexTired);
-		strStatus $= " , " $ ColourText(strWounded $ ":" @ CurrentBarracksStatus.Wounded, HexWounded);
-
-		`LOG("Geoscape Barracks Status Display Multi Line Active",bEnableLogging,'RustyShowBarracksGeo');
+		`LOG("Geoscape Barracks Status Display Multi Line Active", bEnableLogging,'RustyShowBarracksGeo');
 	}
-
-	//log numbers for obs
-	`LOG("Barrack Numbers :: " 
-			@ "\n U/A:			" @CurrentBarracksStatus.Unavailable
-			@ "\n Infiltrating:	" @CurrentBarracksStatus.Infiltrating 
-			@ "\n On Covert:	" @CurrentBarracksStatus.OnCovertAction 
-			@ "\n Ready:		" @CurrentBarracksStatus.Ready 
-			@ "\n Tired:		" @CurrentBarracksStatus.Tired 
-			@ "\n Wounded:		" @CurrentBarracksStatus.Wounded 
-			@ "\n Captured:		" @CurrentBarracksStatus.Captured
-			@ "\n In Havens:	" @CurrentBarracksStatus.InHaven
-			@ "\n Total:		" @CurrentBarracksStatus.Total
-			, bEnableLogging,'RustyShowBarracksGeo');
 
     //change the Description in the panel
     GeoBarracksTextDescription.SetText(class'UIUtilities_Text'.static.AddFontInfo(strStatus, false, false, false, 18) );
 
 	//update Title colour based on new data
-   	GeoBarracksTitleHeader.SetText(class'UIUtilities_Text'.static.GetColoredText(strSoldiers, GetTitleColor() , 28), "");
+   	GeoBarracksTitleHeader.SetText(class'UIUtilities_Text'.static.GetColoredText(strSoldiers, GetTitleColor(CurrentBarracksStatus) , 28), "");
 
-    `LOG("===== GEOSCAPE BARRACKS STATUS TEXT UPDATE DONE =====",bEnableLogging,'RustyShowBarracksGeo');
+    `LOG("===== GEOSCAPE BARRACKS STATUS TEXT UPDATE DONE =====", bEnableLogging,'RustyShowBarracksGeo');
 }
 
 	/////////////////////////////////////////////////////////////////
@@ -310,16 +306,18 @@ event Tick (float DeltaTime)
 //  COLOURING THE TITLE BAR BASED ON STATUS
 ///////////////////////////////////////////////////////////////////////////////
 
-static function EUIState GetTitleColor()
+static function EUIState GetTitleColor(BarracksStatusReport_Rusty CurrentBarracksStatus)
 {
-	local BarracksStatusReport_Rusty CurrentBarracksStatus;
+	//local BarracksStatusReport_Rusty CurrentBarracksStatus;
+	local int ReadyThreshold;
 
 	//get report of all xcom HQ soldiers current activities
-	CurrentBarracksStatus = class'X2DownloadableContentInfo_WOTC_CI_ResizeHangarStatus'.static.GetBarracksStatusReport_Rusty();
-
-	if (CurrentBarracksStatus.Ready >= 6)																				{ return eUIState_Cash;		}
+	//CurrentBarracksStatus = class'X2DownloadableContentInfo_WOTC_CI_ResizeHangarStatus'.static.GetBarracksStatusReport_Rusty();
+	ReadyThreshold = class'X2DownloadableContentInfo_WOTC_CI_ResizeHangarStatus'.default.ReadyThreshold;
+	
+	if (CurrentBarracksStatus.Ready >= ReadyThreshold)																	{ return eUIState_Cash;		}
 	else if (CurrentBarracksStatus.Infiltrating + CurrentBarracksStatus.OnCovertAction >= 1 )							{ return eUIState_Warning; 	}
-	else if (CurrentBarracksStatus.Tired + CurrentBarracksStatus.InHaven >= 1 )											{ return eUIState_Warning2; }
+	else if (CurrentBarracksStatus.Tired + CurrentBarracksStatus.InHaven + CurrentBarracksStatus.Busy >= 1 )			{ return eUIState_Warning2; }
 	else if (CurrentBarracksStatus.Wounded + CurrentBarracksStatus.Captured >= 1)										{ return eUIState_Bad; 		}
 
 	// default if above criteria not met, CurrentBarracksStatus.Unavailable >=1 .. or LOGIC ERROR ?
@@ -328,8 +326,12 @@ static function EUIState GetTitleColor()
 
 	/////////////////////////////////////////////////////////////////
 
-static function string ColourText(string strValue, string strColour)
+//A = text, B = number
+simulated function string ColourText(string strValueA, coerce string strValueB, string strColour)
 {
+	local string strValue;
+	strValue = bStackedLines ? (strValueB @ ":" @ strValueA) : (strValueA $ ":" @ strValueB) ;
+
 	//colour a html string by hex value input
 	return "<font color='#" $ strColour $ "'>" $ strValue $ "</font>";
 }
@@ -398,21 +400,25 @@ simulated event Removed()
 
 ///////////////////////////////////////////////////////////////////////////////
 //  COMMAND TO BRING UP THE MENU
-//	SEE ALSO THE UISL FOR HANDLEINPUT
+//	REPLACED BY THE UISL HANDLE INPUT COMMANDS
 ///////////////////////////////////////////////////////////////////////////////
-
+/*
 simulated function bool OnUnrealCommand(int cmd, int arg)
 {
 	// Only pay attention to presses or repeats; ignoring other input types
-	if ( !CheckInputIsReleaseOrDirectionRepeat(cmd, arg) )
-		return false;
+	//if ( !CheckInputIsReleaseOrDirectionRepeat(cmd, arg) )
+	//	return false;
 
 	switch( cmd )
 	{
-		case class'UIUtilities_Input'.const.FXS_DPAD_DOWN:
-			`HQPRES.UIPersonnel_LivingQuarters(OnPersonnelSelected);
+		case class'UIUtilities_Input'.const.FXS_BUTTON_R3:
+			if (arg == class'UIUtilities_Input'.const.FXS_ACTION_HOLD)
+			{
+				`HQPRES.UIPersonnel_LivingQuarters(OnPersonnelSelected);
+			}
 			break;
 	}
 
 	return super.OnUnrealCommand(cmd, arg);
 }
+*/
