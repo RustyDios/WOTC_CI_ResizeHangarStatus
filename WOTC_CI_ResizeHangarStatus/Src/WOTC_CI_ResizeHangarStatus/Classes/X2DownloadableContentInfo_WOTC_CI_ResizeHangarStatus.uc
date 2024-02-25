@@ -32,7 +32,7 @@ var config string    HexSoldiers, HexReady, HexTired, HexWounded, HexInfiltratin
 var localized string strBusy;
 var config string    HexBusy;
 
-var config bool bEnableLogging, bEnableXWynnesStatGroups;
+var config bool bEnableLogging, bEnableXWynnsStatGroups;
 var config bool bEnableOnAvenger, bAvengerIsFlatLine, bAvengerIsOneLinePerStat;
 var config bool bEnableOnGeoscape, bGeoscapeIsFlatLine, bGeoscapeIsOneLinePerStat;
 
@@ -230,7 +230,7 @@ static function BarracksStatusReport_Rusty GetBarracksStatusReport_Rusty()
 		else if (Tuple.Data[5].b || default.StaffSlotNames_Haven.Find(StaffSlotTemplateName) != INDEX_NONE )
 		{
 			//Tuple data response from LWotC or in config list of Staff Slot names
-			default.bEnableXWynnesStatGroups ? CurrentBarracksStatus.Busy++ : CurrentBarracksStatus.InHaven++;
+			default.bEnableXWynnsStatGroups ? CurrentBarracksStatus.Busy++ : CurrentBarracksStatus.InHaven++;
 		}
 		else if (Tuple.Data[8].b || default.StaffSlotNames_Infil.Find(StaffSlotTemplateName) != INDEX_NONE )
 		{
@@ -240,19 +240,19 @@ static function BarracksStatusReport_Rusty GetBarracksStatusReport_Rusty()
 		else if (Soldier.IsOnCovertAction())
 		{
 			//Covert actions
-			default.bEnableXWynnesStatGroups ? CurrentBarracksStatus.Unavailable++ : CurrentBarracksStatus.OnCovertAction++;
+			default.bEnableXWynnsStatGroups ? CurrentBarracksStatus.Unavailable++ : CurrentBarracksStatus.OnCovertAction++;
 		}
 		else if (Soldier.IsInjured())
 		{
 			//any and all wounds
-			default.bEnableXWynnesStatGroups ? CurrentBarracksStatus.Unavailable++ : CurrentBarracksStatus.Wounded++;
+			default.bEnableXWynnsStatGroups ? CurrentBarracksStatus.Unavailable++ : CurrentBarracksStatus.Wounded++;
 		}
 		else if (Soldier.CanGoOnMission())
 		{
 			//Can go on mission, tired or ready
 			if (Soldier.GetMentalState() == eMentalState_Tired)
 			{
-				default.bEnableXWynnesStatGroups ? CurrentBarracksStatus.Busy++ : CurrentBarracksStatus.Tired++;
+				default.bEnableXWynnsStatGroups ? CurrentBarracksStatus.Busy++ : CurrentBarracksStatus.Tired++;
 			}
 			else
 			{
@@ -263,7 +263,7 @@ static function BarracksStatusReport_Rusty GetBarracksStatusReport_Rusty()
 		{
 			//so this counts shaken, gts training, psi training, bond training, pexm testing, soldier conditioning etc etc
 			//basically anyone that can't go on a mission and doesn't fit any of the above criteria
-			default.bEnableXWynnesStatGroups ? CurrentBarracksStatus.Busy++ :CurrentBarracksStatus.Unavailable++;
+			default.bEnableXWynnsStatGroups ? CurrentBarracksStatus.Busy++ :CurrentBarracksStatus.Unavailable++;
 		}
 	}
 
