@@ -1,8 +1,7 @@
 //*******************************************************************************************
 //  FILE:   XComDownloadableContentInfo_WOTC_CI_ResizeHangarStatus.uc     by RustyDios                                
 //           
-//	File created	06/07/21	01:30	
-//	LAST UPDATED	09/02/22	03:30
+//	File created	06/07/21	01:30	LAST UPDATED	25/02/24	17:45
 // 
 //	Patch CI Hangar Display over 3 lines
 //	Old issue: BG Panel does not resize to list height -- FIXED with help from kdm2k6

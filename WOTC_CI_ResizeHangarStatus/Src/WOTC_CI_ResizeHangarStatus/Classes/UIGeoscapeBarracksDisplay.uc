@@ -1,8 +1,7 @@
 //*******************************************************************************************
 //  FILE:   Show Barracks Status On Geo by RustyDios                           
 //  
-//	File CREATED	02/09/21	10:15
-//	LAST UPDATED    21/02/22	09:30
+//	File CREATED	02/09/21	10:15	LAST UPDATED    25/02/24	17:30
 //
 //	ADDS A NEW PANEL TO THE GEOSCAPE THAT DISPLAYS THE BARRACKS STATUS
 //  CODED WITH HELP FROM XYMANEK

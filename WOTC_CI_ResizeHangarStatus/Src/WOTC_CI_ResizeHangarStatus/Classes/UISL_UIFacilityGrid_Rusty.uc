@@ -1,8 +1,7 @@
 //*******************************************************************************************
-//  FILE:    UIFacilityGrid_FacilityOverlay
+//  FILE:    UIFacilityGrid_FacilityOverlay by RustyDios
 //  
-//	File created by RustyDios	05/07/21	01:30	
-//	LAST UPDATED				08/07/21	05:00
+//	File created    05/07/21	01:30	LAST UPDATED    25/02/24    17:45
 //
 //	Override to fix the background panel for the Hangar to adjust to new 3line format
 //	HUGE props to kdm2k6 for help with this!
