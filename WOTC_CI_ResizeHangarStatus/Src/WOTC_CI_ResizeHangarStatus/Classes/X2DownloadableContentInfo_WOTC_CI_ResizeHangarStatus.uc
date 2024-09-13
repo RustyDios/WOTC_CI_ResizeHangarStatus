@@ -1,7 +1,7 @@
 //*******************************************************************************************
 //  FILE:   XComDownloadableContentInfo_WOTC_CI_ResizeHangarStatus.uc     by RustyDios                                
 //           
-//	File created	06/07/21	01:30	LAST UPDATED	25/02/24	17:45
+//	File created	06/07/21	01:30	LAST UPDATED	13/09/24	18:30
 // 
 //	Patch CI Hangar Display over 3 lines
 //	Old issue: BG Panel does not resize to list height -- FIXED with help from kdm2k6
@@ -16,6 +16,7 @@ struct BarracksStatusReport_Rusty
 	var int Ready;
 	var int Tired;
 	var int Wounded;
+	var int Shaken;
 	var int Infiltrating;
 	var int OnCovertAction;
 	var int Captured;
@@ -26,8 +27,8 @@ struct BarracksStatusReport_Rusty
 };
 
 // new strings for display for Hangar display based on CI one
-var localized string strSoldiers, strReady, strTired, strWounded, strInfiltrating, strOnCovertAction, strUnavailable, strCaptured, strInHaven;
-var config string    HexSoldiers, HexReady, HexTired, HexWounded, HexInfiltrating, HexOnCovertAction, HexUnavailable, HexCaptured, HexInHaven;
+var localized string strSoldiers, strReady, strTired, strWounded, strShaken, strInfiltrating, strOnCovertAction, strUnavailable, strCaptured, strInHaven;
+var config string    HexSoldiers, HexReady, HexTired, HexWounded, HexShaken, HexInfiltrating, HexOnCovertAction, HexUnavailable, HexCaptured, HexInHaven;
 
 var localized string strBusy;
 var config string    HexBusy;
@@ -124,7 +125,12 @@ static function string GetPatchedHangarQueueMessage_Rusty(StateObjectReference F
 	/* UA */ 		LocalOrder.AddItem(ColourText(default.strUnavailable, CurrentBarracksStatus.Unavailable, default.HexUnavailable));
 	/* Busy */		LocalOrder.AddItem(ColourText(default.strBusy, CurrentBarracksStatus.Busy, default.HexBusy));
 	
-	//only show if you have advisors in havens or captured units
+	//only show if you have shaken units, advisors in havens or captured units
+	/* Shaken */	if (CurrentBarracksStatus.Shaken > 0)
+					{
+						LocalOrder.AddItem(ColourText(default.strShaken, CurrentBarracksStatus.Shaken, default.HexShaken));
+					}
+
 	/* Haven */		if (CurrentBarracksStatus.InHaven > 0)
 					{
 						LocalOrder.AddItem(ColourText(default.strInHaven, CurrentBarracksStatus.InHaven, default.HexInHaven));
@@ -158,7 +164,7 @@ static function string GetPatchedHangarQueueMessage_Rusty(StateObjectReference F
 		//	Soldiers: Unavailable XX
 		//	[Haven Advisors xx , ] (Captured xx) 
 		//	Infiltrating xx, On Covert Actions xx
-		//	Ready xx, Tired xx, Wounded xx
+		//	Ready xx, Tired xx, Wounded xx (, Shaken xx)
 
 		MultiLine1 = AddPartsInOrder(default.FormatOrderA1, LocalOrder, " , ", true );
 		MultiLine2 = AddPartsInOrder(default.FormatOrderA2, LocalOrder, " , ", true );
@@ -242,6 +248,10 @@ static function BarracksStatusReport_Rusty GetBarracksStatusReport_Rusty()
 			//Covert actions
 			default.bEnableXWynnsStatGroups ? CurrentBarracksStatus.Unavailable++ : CurrentBarracksStatus.OnCovertAction++;
 		}
+		else if (Soldier.GetMentalState() == eMentalState_Shaken)
+		{
+			default.bEnableXWynnsStatGroups ? CurrentBarracksStatus.Unavailable++ : CurrentBarracksStatus.Shaken++;
+		}
 		else if (Soldier.IsInjured())
 		{
 			//any and all wounds
@@ -261,7 +271,7 @@ static function BarracksStatusReport_Rusty GetBarracksStatusReport_Rusty()
 		}
 		else
 		{
-			//so this counts shaken, gts training, psi training, bond training, pexm testing, soldier conditioning etc etc
+			//so this counts -shaken-, gts training, psi training, bond training, pexm testing, soldier conditioning etc etc
 			//basically anyone that can't go on a mission and doesn't fit any of the above criteria
 			default.bEnableXWynnsStatGroups ? CurrentBarracksStatus.Busy++ :CurrentBarracksStatus.Unavailable++;
 		}
@@ -274,7 +284,8 @@ static function BarracksStatusReport_Rusty GetBarracksStatusReport_Rusty()
 			@ "\n On Covert:	" @CurrentBarracksStatus.OnCovertAction 
 			@ "\n Ready:		" @CurrentBarracksStatus.Ready 
 			@ "\n Tired:		" @CurrentBarracksStatus.Tired 
-			@ "\n Wounded:		" @CurrentBarracksStatus.Wounded 
+			@ "\n Wounded:		" @CurrentBarracksStatus.Wounded
+			@ "\n Shaken:		" @CurrentBarracksStatus.Shaken
 			@ "\n Captured:		" @CurrentBarracksStatus.Captured
 			@ "\n In Havens:	" @CurrentBarracksStatus.InHaven
 			@ "\n Busy:			" @CurrentBarracksStatus.Busy

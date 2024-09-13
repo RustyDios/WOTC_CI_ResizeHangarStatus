@@ -1,7 +1,7 @@
 //*******************************************************************************************
 //  FILE:   Show Barracks Status On Geo by RustyDios                           
 //  
-//	File CREATED	02/09/21	10:15	LAST UPDATED    25/02/24	17:30
+//	File CREATED	02/09/21	10:15	LAST UPDATED    13/09/24	18:30
 //
 //	ADDS A NEW PANEL TO THE GEOSCAPE THAT DISPLAYS THE BARRACKS STATUS
 //  CODED WITH HELP FROM XYMANEK
@@ -20,8 +20,8 @@ var UITextContainer GeoBarracksTextDescription;
 
 var bool bStackedLines, bFlatLine, bEnableLogging;
 
-var string strSoldiers, strReady, strTired, strWounded, strInfiltrating, strOnCovertAction, strUnavailable, strCaptured, strInHaven;
-var string HexSoldiers, HexReady, HexTired, HexWounded, HexInfiltrating, HexOnCovertAction, HexUnavailable, HexCaptured, HexInHaven;
+var string strSoldiers, strReady, strTired, strWounded, strShaken, strInfiltrating, strOnCovertAction, strUnavailable, strCaptured, strInHaven;
+var string HexSoldiers, HexReady, HexTired, HexWounded, HexShaken, HexInfiltrating, HexOnCovertAction, HexUnavailable, HexCaptured, HexInHaven;
 
 var string strBusy, HexBusy;
 
@@ -67,6 +67,7 @@ simulated function CopySettingsFromDLCInfo()
 	strReady			= class'X2DownloadableContentInfo_WOTC_CI_ResizeHangarStatus'.default.strReady;
 	strTired			= class'X2DownloadableContentInfo_WOTC_CI_ResizeHangarStatus'.default.strTired;
 	strWounded			= class'X2DownloadableContentInfo_WOTC_CI_ResizeHangarStatus'.default.strWounded;
+	strShaken			= class'X2DownloadableContentInfo_WOTC_CI_ResizeHangarStatus'.default.strShaken;
 	strInfiltrating		= class'X2DownloadableContentInfo_WOTC_CI_ResizeHangarStatus'.default.strInfiltrating;
 	strOnCovertAction	= class'X2DownloadableContentInfo_WOTC_CI_ResizeHangarStatus'.default.strOnCovertAction;
 	strUnavailable		= class'X2DownloadableContentInfo_WOTC_CI_ResizeHangarStatus'.default.strUnavailable;
@@ -79,6 +80,7 @@ simulated function CopySettingsFromDLCInfo()
 	HexReady			= class'X2DownloadableContentInfo_WOTC_CI_ResizeHangarStatus'.default.HexReady;
 	HexTired			= class'X2DownloadableContentInfo_WOTC_CI_ResizeHangarStatus'.default.HexTired;
 	HexWounded			= class'X2DownloadableContentInfo_WOTC_CI_ResizeHangarStatus'.default.HexWounded;
+	HexShaken			= class'X2DownloadableContentInfo_WOTC_CI_ResizeHangarStatus'.default.HexShaken;
 	HexInfiltrating		= class'X2DownloadableContentInfo_WOTC_CI_ResizeHangarStatus'.default.HexInfiltrating;
 	HexOnCovertAction	= class'X2DownloadableContentInfo_WOTC_CI_ResizeHangarStatus'.default.HexOnCovertAction;
 	HexUnavailable		= class'X2DownloadableContentInfo_WOTC_CI_ResizeHangarStatus'.default.HexUnavailable;
@@ -235,7 +237,12 @@ simulated function UpdateGeoBarracksText()
 	/* UA */ 		LocalOrder.AddItem(ColourText(strUnavailable, CurrentBarracksStatus.Unavailable, HexUnavailable));
 	/* Busy */		LocalOrder.AddItem(ColourText(strBusy, CurrentBarracksStatus.Busy, HexBusy));
 
-	//only show if you have advisors in havens or captured units
+	//only show if you have shaken units, advisors in havens or captured units
+	/* Shaken */	if (CurrentBarracksStatus.Shaken > 0)
+					{
+						LocalOrder.AddItem(ColourText(default.strShaken, CurrentBarracksStatus.Shaken, default.HexShaken));
+					}
+
 	/* Haven */		if (CurrentBarracksStatus.InHaven > 0)
 					{
 						LocalOrder.AddItem(ColourText(strInHaven, CurrentBarracksStatus.InHaven, HexInHaven));
@@ -266,7 +273,7 @@ simulated function UpdateGeoBarracksText()
 		//Compact Block multiline layout, over 3 lines
 		//	U/a XX , [Haven Advisor xx] , (Captured xx), 
 		//	Infiltrating xx, Covert Action xx
-		//	Ready xx, Tired xx, Wounded xx
+		//	Ready xx, Tired xx, Wounded xx, Shaken xx
 		MultiLine1 = AddPartsInOrder(FormatOrderG1, LocalOrder, " , ", true );
 		MultiLine2 = AddPartsInOrder(FormatOrderG2, LocalOrder, " , ", true ); 
 		MultiLine3 = AddPartsInOrder(FormatOrderG3, LocalOrder, " , "); 
