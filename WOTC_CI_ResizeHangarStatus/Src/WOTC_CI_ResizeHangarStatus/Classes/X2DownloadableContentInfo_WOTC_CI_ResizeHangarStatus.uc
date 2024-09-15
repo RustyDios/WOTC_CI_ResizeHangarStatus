@@ -27,11 +27,8 @@ struct BarracksStatusReport_Rusty
 };
 
 // new strings for display for Hangar display based on CI one
-var localized string strSoldiers, strReady, strTired, strWounded, strShaken, strInfiltrating, strOnCovertAction, strUnavailable, strCaptured, strInHaven;
-var config string    HexSoldiers, HexReady, HexTired, HexWounded, HexShaken, HexInfiltrating, HexOnCovertAction, HexUnavailable, HexCaptured, HexInHaven;
-
-var localized string strBusy;
-var config string    HexBusy;
+var localized string strSoldiers, strReady, strTired, strWounded, strShaken, strInfiltrating, strOnCovertAction, strUnavailable, strCaptured, strInHaven, strBusy;
+var config string HexSoldiers, HexReady, HexTired, HexWounded, HexShaken, HexInfiltrating, HexOnCovertAction, HexUnavailable, HexCaptured, HexInHaven, HexBusy;
 
 var config bool bEnableLogging, bEnableXWynnsStatGroups;
 var config bool bEnableOnAvenger, bAvengerIsFlatLine, bAvengerIsOneLinePerStat;
@@ -78,22 +75,23 @@ static function PatchHangar_Rusty()
 
 	/////////////////////////////////////////////////////////////////
 
-static function string AddPartsInOrder(array<string> FormatOrder, array<string> LocalOrder, string Separator, optional bool bAlwaysAddSeparator)
+static function string AddPartsInOrder(array<string> FormatOrder, out array<string> LocalOrder, string Separator, optional bool bAlwaysAddSeparator)
 {
-	local string strStatus, locOrder;
-	local int i;
+	local string strStatus;
+	local int i, j;
 
 	strStatus = "";
 
 	for (i = 0 ; i < FormatOrder.length ; i++)
 	{
-		foreach LocalOrder(locOrder)
+		for (j = LocalOrder.length -1 ; j >= 0 ; j--)  //LocalOrder(locOrder)
 		{
-			if (InStr(locOrder, FormatOrder[i]) != INDEX_NONE)
+			if (InStr(LocalOrder[j], FormatOrder[i]) != INDEX_NONE)
 			{
-				strStatus $= locOrder;
+				strStatus $= LocalOrder[j];
+				LocalOrder.Remove(j, 1);
 
-				if (i < FormatOrder.length -1 || bAlwaysAddSeparator)
+				if (((i < FormatOrder.length -1) && (LocalOrder.length > 1)) || bAlwaysAddSeparator)
 				{
 					strStatus $= Separator;
 				}
@@ -233,17 +231,17 @@ static function BarracksStatusReport_Rusty GetBarracksStatusReport_Rusty()
 			//Vanilla capture includes by Advent and Chosen
 			CurrentBarracksStatus.Captured++;
 		}
-		else if (Tuple.Data[5].b || default.StaffSlotNames_Haven.Find(StaffSlotTemplateName) != INDEX_NONE )
+		else if ((Tuple.Data[5].b || default.StaffSlotNames_Haven.Find(StaffSlotTemplateName) != INDEX_NONE) )
 		{
 			//Tuple data response from LWotC or in config list of Staff Slot names
 			default.bEnableXWynnsStatGroups ? CurrentBarracksStatus.Busy++ : CurrentBarracksStatus.InHaven++;
 		}
-		else if (Tuple.Data[8].b || default.StaffSlotNames_Infil.Find(StaffSlotTemplateName) != INDEX_NONE )
+		else if ((Tuple.Data[8].b || default.StaffSlotNames_Infil.Find(StaffSlotTemplateName) != INDEX_NONE) )
 		{
 			//Tuple data response from LWotC or in config list of Staff Slot names
 			CurrentBarracksStatus.Infiltrating++;
 		}
-		else if (Soldier.IsOnCovertAction())
+		else if (Soldier.IsOnCovertAction() )
 		{
 			//Covert actions
 			default.bEnableXWynnsStatGroups ? CurrentBarracksStatus.Unavailable++ : CurrentBarracksStatus.OnCovertAction++;
@@ -252,7 +250,7 @@ static function BarracksStatusReport_Rusty GetBarracksStatusReport_Rusty()
 		{
 			default.bEnableXWynnsStatGroups ? CurrentBarracksStatus.Unavailable++ : CurrentBarracksStatus.Shaken++;
 		}
-		else if (Soldier.IsInjured())
+		else if (Soldier.IsInjured() )
 		{
 			//any and all wounds
 			default.bEnableXWynnsStatGroups ? CurrentBarracksStatus.Unavailable++ : CurrentBarracksStatus.Wounded++;
@@ -260,7 +258,7 @@ static function BarracksStatusReport_Rusty GetBarracksStatusReport_Rusty()
 		else if (Soldier.CanGoOnMission())
 		{
 			//Can go on mission, tired or ready
-			if (Soldier.GetMentalState() == eMentalState_Tired)
+			if (Soldier.GetMentalState() == eMentalState_Tired )
 			{
 				default.bEnableXWynnsStatGroups ? CurrentBarracksStatus.Busy++ : CurrentBarracksStatus.Tired++;
 			}
@@ -271,7 +269,7 @@ static function BarracksStatusReport_Rusty GetBarracksStatusReport_Rusty()
 		}
 		else
 		{
-			//so this counts -shaken-, gts training, psi training, bond training, pexm testing, soldier conditioning etc etc
+			//so this counts gts training, psi training, bond training, pexm testing, soldier conditioning, trait recovery, gene modding, mec conversion etc etc
 			//basically anyone that can't go on a mission and doesn't fit any of the above criteria
 			default.bEnableXWynnsStatGroups ? CurrentBarracksStatus.Busy++ :CurrentBarracksStatus.Unavailable++;
 		}

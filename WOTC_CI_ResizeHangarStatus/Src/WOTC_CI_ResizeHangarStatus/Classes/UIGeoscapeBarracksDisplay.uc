@@ -189,22 +189,23 @@ simulated function OnPersonnelSelected(StateObjectReference selectedUnitRef)
 //  UPDATING TEXT
 ///////////////////////////////////////////////////////////////////////////////
 
-simulated function string AddPartsInOrder(array<string> FormatOrder, array<string> LocalOrder, string Separator, optional bool bAlwaysAddSeparator)
+simulated function string AddPartsInOrder(array<string> FormatOrder, out array<string> LocalOrder, string Separator, optional bool bAlwaysAddSeparator)
 {
-	local string strStatus, locOrder;
-	local int i;
+	local string strStatus;
+	local int i, j;
 
 	strStatus = "";
 
 	for (i = 0 ; i < FormatOrder.length ; i++)
 	{
-		foreach LocalOrder(locOrder)
+		for (j = LocalOrder.length -1 ; j >= 0 ; j--)  //LocalOrder(locOrder)
 		{
-			if (InStr(locOrder, FormatOrder[i]) != INDEX_NONE)
+			if (InStr(LocalOrder[j], FormatOrder[i]) != INDEX_NONE)
 			{
-				strStatus $= locOrder;
+				strStatus $= LocalOrder[j];
+				LocalOrder.Remove(j, 1);
 
-				if (i < FormatOrder.length -1 || bAlwaysAddSeparator)
+				if (((i < FormatOrder.length -1) && (LocalOrder.length > 1)) || bAlwaysAddSeparator)
 				{
 					strStatus $= Separator;
 				}
@@ -240,7 +241,7 @@ simulated function UpdateGeoBarracksText()
 	//only show if you have shaken units, advisors in havens or captured units
 	/* Shaken */	if (CurrentBarracksStatus.Shaken > 0)
 					{
-						LocalOrder.AddItem(ColourText(default.strShaken, CurrentBarracksStatus.Shaken, default.HexShaken));
+						LocalOrder.AddItem(ColourText(strShaken, CurrentBarracksStatus.Shaken, HexShaken));
 					}
 
 	/* Haven */		if (CurrentBarracksStatus.InHaven > 0)

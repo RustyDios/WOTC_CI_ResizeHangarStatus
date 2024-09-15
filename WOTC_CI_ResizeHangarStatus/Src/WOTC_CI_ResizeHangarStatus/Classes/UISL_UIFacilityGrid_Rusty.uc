@@ -35,11 +35,11 @@ event OnInit(UIScreen Screen)
                 else if (class'X2DownloadableContentInfo_WOTC_CI_ResizeHangarStatus'.default.bAvengerIsOneLinePerStat)
                 {
                     FacilityOverlay.MC.ChildSetNum("queueLabel.bg", "_width", 275);
-                    FacilityOverlay.MC.ChildSetNum("queueLabel.bg", "_height", 140);
+                    FacilityOverlay.MC.ChildSetNum("queueLabel.bg", "_height", 160);
                 }
                 else
                 {
-                    FacilityOverlay.MC.ChildSetNum("queueLabel.bg", "_width", 275);
+                    FacilityOverlay.MC.ChildSetNum("queueLabel.bg", "_width", 300);
                     FacilityOverlay.MC.ChildSetNum("queueLabel.bg", "_height", 60);
                 }
             }
